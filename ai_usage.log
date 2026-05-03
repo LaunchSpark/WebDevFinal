@@ -1,0 +1,5 @@
+# BlockDraft — AI Usage Log
+# This file documents all use of generative AI in this project.
+# Format: [date] | tool | purpose | files affected
+
+[2026-05-03] | Claude Code (claude-sonnet-4-6) | Architecture design, implementation planning | docs/superpowers/
