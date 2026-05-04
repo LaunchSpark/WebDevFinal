@@ -3,3 +3,5 @@
 # Format: [date] | tool | purpose | files affected
 
 [2026-05-03] | Claude Code (claude-sonnet-4-6) | Architecture design, implementation planning | docs/superpowers/
+[2026-05-03] | Claude Code (claude-sonnet-4-6) | Full implementation: server routes, DB layer, frontend modules, cell classes, core event logic | server/, public/js/, public/index.html, public/css/
+[2026-05-03] | Google Gemini 1.5 Flash | Runtime AI: resume bullet refinement, skill keyword suggestions, award/cert rewrites, education summaries | server/routes/ai.js

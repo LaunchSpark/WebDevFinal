@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BlockDraft — Resume Editor</title>
   <meta name="description" content="Block-based resume editor for tailoring and printing professional resumes">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="css/tailwind.css">
   <link rel="stylesheet" href="css/print.css">
@@ -16,7 +17,7 @@
     role="banner">
     <div class="flex items-center gap-2">
       <img src="assets/favicon.ico" alt="" class="w-6 h-6" aria-hidden="true">
-      <span class="font-bold text-gray-900 text-xl tracking-tight">BlockDraft</span>
+      <h1 class="font-bold text-gray-900 text-xl tracking-tight m-0">BlockDraft</h1>
     </div>
     <nav class="flex gap-2" aria-label="Application actions">
       <button id="settings-btn"
@@ -95,7 +96,7 @@
         role="region"
         aria-label="Resume canvas — click any entry to edit">
         <!-- Resume sections rendered dynamically by JavaScript -->
-        <p class="text-gray-400 text-sm text-center mt-4" id="empty-hint">
+        <p class="text-gray-500 text-sm text-center mt-4" id="empty-hint">
           Click "Add Section" to get started.
         </p>
       </div>
