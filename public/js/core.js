@@ -165,6 +165,7 @@ async function handleToolbarAction(action, cellWrapper) {
 }
 
 async function handleAddBullet(cellWrapper) {
+  await saveCell(cellWrapper);
   const entryId = parseInt(cellWrapper.dataset.entryId);
   const type = cellWrapper.dataset.sectionType;
   const section = resumeData.sections.find(s => s.type === type);
