@@ -5,8 +5,9 @@ export class SkillCell {
   renderView() {
     return `
       <div class="cell-view" role="article" aria-label="Skills: ${escHtml(this.data.title || 'category')}">
-        <span class="font-semibold text-gray-900">${escHtml(this.data.title || '')}: </span>
-        <span class="text-gray-800 text-sm">${escHtml(this.data.extra || '')}</span>
+        <p class="text-gray-900" style="font-size:11pt; line-height:1.3">
+          <span class="font-bold">${escHtml(this.data.title || '')}: </span><span>${escHtml(this.data.extra || '')}</span>
+        </p>
       </div>`;
   }
 
