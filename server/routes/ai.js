@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const db = require('../db');
+const { getEnvValue } = require('../env');
 
 function buildPrompt(type, input) {
   switch (type) {
@@ -19,13 +19,7 @@ function buildPrompt(type, input) {
 }
 
 function getApiKey() {
-  if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
-  try {
-    const row = db.prepare('SELECT value FROM config WHERE key = ?').get('gemini_key');
-    return row ? row.value : null;
-  } catch {
-    return null;
-  }
+  return getEnvValue('GEMINI_API_KEY');
 }
 
 router.post('/refine', async (req, res) => {
@@ -34,10 +28,13 @@ router.post('/refine', async (req, res) => {
 
   const apiKey = getApiKey();
   if (!apiKey) return res.status(400).json({ error: 'No Gemini API key configured. Add it in Settings.' });
+  if (!/^[\x20-\x7E]+$/.test(apiKey)) {
+    return res.status(400).json({ error: 'Stored API key contains invalid characters — re-enter it in Settings.' });
+  }
 
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
     const result = await model.generateContent(buildPrompt(type, input));
     const refined = result.response.text().trim();
     res.json({ refined });

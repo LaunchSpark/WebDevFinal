@@ -30,7 +30,9 @@
   /* Canvas becomes the full page */
   #page-canvas {
     box-shadow: none !important;
-    padding: 0 !important;
+    padding: 0;
+    padding-left: .5in !important;
+    padding-right: .5in !important;
     width: 100% !important;
     min-height: auto !important;
     font-family: 'Times New Roman', Times, serif !important;
@@ -50,9 +52,9 @@
     text-transform: none;
     letter-spacing: normal;
     border-bottom: 1px solid black;
-    padding-bottom: 1pt;
-    margin-bottom: 4pt;
-    margin-top: 8pt;
+    padding-bottom: 0pt;
+    margin-bottom: 2pt;
+    margin-top: 4pt;
     color: black;
   }
 
@@ -76,6 +78,10 @@
     list-style-type: disc;
   }
 
+  ul li {
+    margin-bottom: 2pt;
+  }
+
   .cell-wrapper {
     cursor: default !important;
     margin-bottom: 4pt !important;
@@ -83,6 +89,13 @@
     border: none !important;
     padding: 0 !important;
     outline: none !important;
+  }
+
+  .header-wrapper {
+    position: static !important;
+    padding-bottom: 8pt !important;
+    margin-bottom: 10pt !important;
+    border-bottom: 1px solid black;
   }
 
   /* Page margins: 0.5in top/bottom, 1in left/right — matches reference */

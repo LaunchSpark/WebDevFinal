@@ -8,7 +8,8 @@ You are an expert web development assistant helping a senior CS student. This pr
 - **Frameworks:** **STRICTLY PROHIBITED.** No React, Vue, Angular, or Svelte.
 - **Styling:** Use Tailwind CSS (local compiled). Minimize custom CSS.
 - **Backend:** Node.js with Express (RESTful API).
-- **Architecture:** - **No MVC or SSR.** Use a client-side SPA approach.
+- **Architecture:** - **No MVC or SSR.** Use a client-side SPA approach
+.
     - Single `index.html` file that loads/unloads DOM segments.
 - **Database:** SQLite (local).
 - **Libraries:** **NO CDNs.** All libraries must be stored locally in the project directory.

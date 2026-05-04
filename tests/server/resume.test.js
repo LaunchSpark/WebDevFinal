@@ -1,5 +1,7 @@
 const path = require('path');
 process.env.DB_PATH = path.join(__dirname, 'test.db');
+process.env.ENV_FILE = path.join(__dirname, '.env.test');
+process.env.GEMINI_API_KEY = '';
 
 const request = require('supertest');
 const app = require('../../server/app');
@@ -8,11 +10,14 @@ const fs = require('fs');
 
 beforeEach(() => {
   db.exec('DELETE FROM bullets; DELETE FROM entries; DELETE FROM sections; DELETE FROM config;');
+  process.env.GEMINI_API_KEY = '';
+  try { fs.unlinkSync(process.env.ENV_FILE); } catch {}
 });
 
 afterAll(() => {
   db.close();
   try { fs.unlinkSync(process.env.DB_PATH); } catch {}
+  try { fs.unlinkSync(process.env.ENV_FILE); } catch {}
 });
 
 describe('GET /api/resume', () => {
@@ -155,10 +160,18 @@ describe('GET /api/config/:key', () => {
     expect(res.status).toBe(404);
   });
 
-  test('returns value after PUT', async () => {
+  test('returns Gemini value after PUT', async () => {
     await request(app).put('/api/config/gemini_key').send({ value: 'test-key-123' });
     const res = await request(app).get('/api/config/gemini_key');
     expect(res.status).toBe(200);
     expect(res.body.value).toBe('test-key-123');
+  });
+
+  test('returns DB-backed value after PUT for resume_header', async () => {
+    const header = JSON.stringify({ name: 'Lucas Starkey', email: 'LucasStarkey255@gmail.com' });
+    await request(app).put('/api/config/resume_header').send({ value: header });
+    const res = await request(app).get('/api/config/resume_header');
+    expect(res.status).toBe(200);
+    expect(res.body.value).toBe(header);
   });
 });

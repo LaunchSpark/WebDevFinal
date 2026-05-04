@@ -5,6 +5,11 @@ import { renderCanvas, swapToEdit, swapToView, injectToolbar, removeToolbar } fr
 import { refine } from './ai.js';
 
 let activeCell = null;
+let isAiInteractionActive = false;
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 async function init() {
   try {
@@ -71,6 +76,7 @@ function wireCanvas() {
   // Blur-save: fires when focus leaves a cell's inputs
   canvas.addEventListener('focusout', () => {
     setTimeout(() => {
+      if (isAiInteractionActive) return;
       const toolbar = document.getElementById('cell-toolbar');
       const stillInCell = activeCell?.contains(document.activeElement);
       const inToolbar = toolbar?.contains(document.activeElement);
@@ -221,21 +227,61 @@ async function handleDeleteBullet(bulletRow) {
 
 async function handleRefineBullet(bulletRow) {
   if (!bulletRow) return;
+  const bulletId = parseInt(bulletRow.dataset.bulletId);
   const textInput = bulletRow.querySelector('.bullet-text');
   const original = textInput.value;
   if (!original.trim()) return;
+  const cellWrapper = bulletRow.closest('.cell-wrapper');
+  const entry = getEntryFromCell(cellWrapper);
+  const bullet = entry?.bullets?.find(b => b.id === bulletId);
+
+  isAiInteractionActive = true;
   textInput.value = 'Refining…';
   textInput.disabled = true;
+  let refined;
   try {
-    const sectionType = bulletRow.closest('.cell-wrapper')?.dataset.sectionType || 'work-experience';
-    const { refined } = await refine(sectionType, original);
-    textInput.value = refined;
+    const sectionType = cellWrapper?.dataset.sectionType || 'work-experience';
+    ({ refined } = await refine(sectionType, original));
   } catch (err) {
-    textInput.value = original;
-    alert('AI refine failed: ' + err.message);
-  } finally {
-    textInput.disabled = false;
+    const fresh = document.querySelector(`.bullet-row[data-bullet-id="${bulletId}"] .bullet-text`);
+    if (fresh) { fresh.value = original; fresh.disabled = false; }
+    Swal.fire({ icon: 'error', title: 'AI Refine Failed', text: err.message, confirmButtonColor: '#2563eb' });
+    isAiInteractionActive = false;
+    return;
   }
+
+  // Re-enable before Swal so blur handler sees normal state
+  const prefresh = document.querySelector(`.bullet-row[data-bullet-id="${bulletId}"] .bullet-text`);
+  if (prefresh) { prefresh.value = original; prefresh.disabled = false; }
+
+  const { isConfirmed } = await Swal.fire({
+    title: 'AI Suggestion',
+    html: `
+      <div style="text-align:left;font-size:13px">
+        <p style="margin-bottom:6px"><strong>Original:</strong></p>
+        <p style="background:#f3f4f6;padding:8px;border-radius:4px;margin-bottom:12px">${escHtml(original)}</p>
+        <p style="margin-bottom:6px"><strong>Refined:</strong></p>
+        <p style="background:#eff6ff;padding:8px;border-radius:4px">${escHtml(refined)}</p>
+      </div>`,
+    showCancelButton: true,
+    confirmButtonText: 'Accept New',
+    cancelButtonText: 'Keep Original',
+    confirmButtonColor: '#2563eb',
+    cancelButtonColor: '#6b7280',
+    width: 560
+  });
+
+  if (isConfirmed) {
+    const postfresh = document.querySelector(`.bullet-row[data-bullet-id="${bulletId}"] .bullet-text`);
+    if (postfresh) postfresh.value = refined;
+    if (bullet) bullet.text = refined;
+    await api.updateBullet(bulletId, { text: refined });
+  } else {
+    const postfresh = document.querySelector(`.bullet-row[data-bullet-id="${bulletId}"] .bullet-text`);
+    if (postfresh) postfresh.value = original;
+  }
+
+  isAiInteractionActive = false;
 }
 
 async function handleRefineEntryText(cellWrapper) {
@@ -254,6 +300,7 @@ async function handleRefineEntryText(cellWrapper) {
     input = inputEl?.value || entry?.title || '';
   }
   if (!input.trim()) return;
+  isAiInteractionActive = true;
 
   const origPlaceholder = inputEl?.placeholder;
   if (inputEl) { inputEl.disabled = true; inputEl.placeholder = 'Refining…'; }
@@ -261,14 +308,41 @@ async function handleRefineEntryText(cellWrapper) {
   try {
     const { refined } = await refine(type, input);
     if (type === 'skills' && inputEl) {
-      inputEl.value = inputEl.value ? `${inputEl.value}, ${refined}` : refined;
+      const nextValue = inputEl.value ? `${inputEl.value}, ${refined}` : refined;
+      inputEl.value = nextValue;
+      entry.extra = nextValue;
+      await api.updateEntry(entryId, { extra: nextValue });
     } else {
-      alert(`AI suggestion:\n\n${refined}`);
+      const { isConfirmed } = await Swal.fire({
+        title: 'AI Suggestion',
+        html: `
+          <div style="text-align:left;font-size:13px">
+            <p style="margin-bottom:6px"><strong>Original:</strong></p>
+            <p style="background:#f3f4f6;padding:8px;border-radius:4px;margin-bottom:12px">${escHtml(input)}</p>
+            <p style="margin-bottom:6px"><strong>Refined:</strong></p>
+            <p style="background:#eff6ff;padding:8px;border-radius:4px">${escHtml(refined)}</p>
+          </div>`,
+        showCancelButton: true,
+        confirmButtonText: 'Accept New',
+        cancelButtonText: 'Keep Original',
+        confirmButtonColor: '#2563eb',
+        cancelButtonColor: '#6b7280',
+        width: 560
+      });
+      if (isConfirmed && inputEl) {
+        inputEl.value = refined;
+        const field = type === 'skills' ? 'extra' : 'title';
+        entry[field] = refined;
+        await api.updateEntry(entryId, { [field]: refined });
+      } else if (inputEl) {
+        inputEl.value = input;
+      }
     }
   } catch (err) {
-    alert('AI refine failed: ' + err.message);
+    Swal.fire({ icon: 'error', title: 'AI Refine Failed', text: err.message, confirmButtonColor: '#2563eb' });
   } finally {
     if (inputEl) { inputEl.disabled = false; inputEl.placeholder = origPlaceholder; }
+    isAiInteractionActive = false;
   }
 }
 
@@ -396,6 +470,14 @@ function wireThankYouModal() {
   thanksModal.addEventListener('click', (e) => {
     if (e.target === thanksModal) thanksModal.classList.add('hidden');
   });
+}
+
+function getEntryFromCell(cellWrapper) {
+  if (!cellWrapper) return null;
+  const entryId = parseInt(cellWrapper.dataset.entryId);
+  const type = cellWrapper.dataset.sectionType;
+  const section = resumeData.sections.find(s => s.type === type);
+  return section?.entries.find(e => e.id === entryId) || null;
 }
 
 document.addEventListener('DOMContentLoaded', init);

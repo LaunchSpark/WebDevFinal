@@ -6,8 +6,17 @@ export function renderCanvas() {
   const canvas = document.getElementById('page-canvas');
   canvas.innerHTML = '';
 
+  const headerWrapper = document.createElement('div');
+  headerWrapper.className = 'cell-wrapper header-wrapper sticky top-0 z-20 mb-5 rounded bg-white px-4 py-3 cursor-pointer hover:outline hover:outline-1 hover:outline-blue-200';
+  headerWrapper.dataset.entryId = 'header';
+  headerWrapper.dataset.sectionType = 'header';
+
+  const headerCell = CellFactory.create('header', resumeData.header);
+  headerWrapper.innerHTML = headerCell.renderView();
+  canvas.appendChild(headerWrapper);
+
   if (!resumeData.sections.length) {
-    canvas.innerHTML = '<p class="text-gray-400 text-sm text-center mt-4">Click "Add Section" to get started.</p>';
+    canvas.insertAdjacentHTML('beforeend', '<p class="text-gray-400 text-sm text-center mt-4">Click "Add Section" to get started.</p>');
     return;
   }
 
@@ -15,14 +24,15 @@ export function renderCanvas() {
     if (!section.is_visible) continue;
 
     const sectionEl = document.createElement('section');
-    sectionEl.className = 'resume-section mb-5';
+    sectionEl.className = 'resume-section mb-3';
     sectionEl.dataset.sectionId = section.id;
     sectionEl.dataset.sectionType = section.type;
     sectionEl.setAttribute('aria-label', section.name);
 
     const heading = document.createElement('h2');
-    heading.className = 'section-heading font-bold border-b border-gray-800 pb-0.5 mb-2 text-gray-900';
+    heading.className = 'section-heading font-bold border-b border-gray-800 pb-0 mb-1 text-gray-900';
     heading.style.fontSize = '13pt';
+    heading.style.lineHeight = '1';
     heading.setAttribute('role', 'heading');
     heading.setAttribute('aria-level', '2');
     heading.textContent = section.name;
@@ -48,9 +58,8 @@ export function renderCanvas() {
 }
 
 export function swapToEdit(cellWrapper) {
-  const entryId = parseInt(cellWrapper.dataset.entryId);
   const type = cellWrapper.dataset.sectionType;
-  const entry = findEntry(type, entryId);
+  const entry = findEntry(type, cellWrapper.dataset.entryId);
   if (!entry) return;
 
   const cell = CellFactory.create(type, entry);
@@ -60,9 +69,8 @@ export function swapToEdit(cellWrapper) {
 }
 
 export function swapToView(cellWrapper) {
-  const entryId = parseInt(cellWrapper.dataset.entryId);
   const type = cellWrapper.dataset.sectionType;
-  const entry = findEntry(type, entryId);
+  const entry = findEntry(type, cellWrapper.dataset.entryId);
   if (!entry) return;
 
   const cell = CellFactory.create(type, entry);
@@ -78,6 +86,7 @@ export function swapToView(cellWrapper) {
 
 export function injectToolbar(cellWrapper) {
   removeToolbar();
+  if (cellWrapper.dataset.sectionType === 'header') return;
   const toolbar = document.createElement('div');
   toolbar.id = 'cell-toolbar';
   toolbar.className = 'no-print absolute -left-24 top-0 flex flex-col gap-1 bg-white border border-gray-200 rounded-lg shadow-lg p-1.5 z-10';
@@ -97,6 +106,7 @@ export function removeToolbar() {
 }
 
 function findEntry(type, entryId) {
+  if (type === 'header') return resumeData.header;
   const section = resumeData.sections.find(s => s.type === type);
-  return section?.entries.find(e => e.id === entryId);
+  return section?.entries.find(e => e.id === Number(entryId));
 }

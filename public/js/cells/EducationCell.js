@@ -44,10 +44,10 @@ export class EducationCell {
               aria-label="Degree name">
           </div>
           <div>
-            <label for="extra-${this.data.id}" class="text-xs font-medium text-gray-600">GPA (optional)</label>
+            <label for="extra-${this.data.id}" class="text-xs font-medium text-gray-600">Location</label>
             <input id="extra-${this.data.id}" type="text" name="extra" value="${escAttr(this.data.extra || '')}"
               class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-              aria-label="GPA">
+              aria-label="Location">
           </div>
         </div>
       </div>`;

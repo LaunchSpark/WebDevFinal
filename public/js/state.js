@@ -1,2 +1,13 @@
 // AI-generated: shared mutable state object for resume data
-export const resumeData = { sections: [] };
+export const defaultHeader = {
+  name: '',
+  phone: '',
+  email: '',
+  link: '',
+  address: ''
+};
+
+export const resumeData = {
+  header: { ...defaultHeader },
+  sections: []
+};
