@@ -33,7 +33,9 @@
     padding: 0 !important;
     width: 100% !important;
     min-height: auto !important;
-    font-family: Georgia, 'Times New Roman', serif !important;
+    font-family: 'Times New Roman', Times, serif !important;
+    font-size: 11pt;
+    color: black;
   }
 
   /* Hide deselected entries */
@@ -41,45 +43,51 @@
     display: none !important;
   }
 
-  /* Typography */
+  /* Section headings — 13pt bold, left-aligned, bottom border, no uppercase */
   h2.section-heading {
-    font-size: 11pt;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1px solid #555;
-    padding-bottom: 2pt;
-    margin-bottom: 5pt;
+    font-size: 13pt;
+    font-weight: bold;
+    text-transform: none;
+    letter-spacing: normal;
+    border-bottom: 1px solid black;
+    padding-bottom: 1pt;
+    margin-bottom: 4pt;
+    margin-top: 8pt;
     color: black;
   }
 
+  /* Entry titles */
   h3.entry-title {
-    font-size: 11pt;
+    font-size: 12pt;
     font-weight: bold;
     color: black;
+    margin: 0;
   }
 
   p, li, span {
-    font-size: 10pt;
-    line-height: 1.35;
+    font-size: 11pt;
+    line-height: 1.15;
     color: black;
   }
 
   ul {
-    margin-left: 14pt;
+    margin-left: 1.2em;
     padding-left: 0;
     list-style-type: disc;
   }
 
   .cell-wrapper {
     cursor: default !important;
-    margin-bottom: 5pt !important;
+    margin-bottom: 4pt !important;
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
+    outline: none !important;
   }
 
+  /* Page margins: 0.5in top/bottom, 1in left/right — matches reference */
   @page {
-    margin: 0.75in;
+    margin: 0.5in 1in;
     size: letter portrait;
   }
 }
