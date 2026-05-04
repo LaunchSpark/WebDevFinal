@@ -100,11 +100,20 @@ describe('POST /api/sections', () => {
     expect(res.status).toBe(500);
   });
 
-  test('rejects legacy type awards with 500', async () => {
+  test('creates awards section', async () => {
     const res = await request(app)
       .post('/api/sections')
       .send({ name: 'Awards', type: 'awards', order_index: 0 });
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(201);
+    expect(res.body.type).toBe('awards');
+  });
+
+  test('creates certifications section', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Certifications', type: 'certifications', order_index: 0 });
+    expect(res.status).toBe(201);
+    expect(res.body.type).toBe('certifications');
   });
 
   test('rejects legacy type certs with 500', async () => {

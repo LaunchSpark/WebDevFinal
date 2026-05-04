@@ -376,7 +376,9 @@ async function addEntry(type) {
     'technical-projects':    'Technical Projects',
     'clubs-and-organization':'Clubs and Organization',
     'education':             'Education',
-    'skills':                'Skills'
+    'skills':                'Skills',
+    'certifications':        'Certifications',
+    'awards':                'Awards'
   };
 
   let section = resumeData.sections.find(s => s.type === type);

@@ -10,7 +10,9 @@ export class CellFactory {
       case 'header':                return new HeaderCell(data);
       case 'work-experience':
       case 'technical-projects':
-      case 'clubs-and-organization': return new ExperienceCell(data);
+      case 'clubs-and-organization':
+      case 'certifications':
+      case 'awards':               return new ExperienceCell(data);
       case 'education':              return new EducationCell(data);
       case 'skills':                 return new SkillCell(data);
       default: throw new Error(`Unknown cell type: ${type}`);

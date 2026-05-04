@@ -9,6 +9,10 @@ function buildPrompt(type, input) {
     case 'technical-projects':
     case 'clubs-and-organization':
       return `Rewrite as an impact-driven resume bullet point. Start with an action verb. Include a measurable outcome if possible. Return ONLY the rewritten bullet, no explanation, no prefix. Input: ${input}`;
+    case 'certifications':
+      return `Rewrite this certification entry to be more professional and impactful for a resume. Return ONLY the improved text: ${input}`;
+    case 'awards':
+      return `Rewrite this award or honor to highlight its significance for a resume. Return ONLY the improved text: ${input}`;
     case 'skills':
       return `Given these skills: ${input}. Suggest 3 missing high-value keywords for a software developer role. Return ONLY a comma-separated list, no explanation.`;
     case 'education':

@@ -12,7 +12,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS sections (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL,
-    type        TEXT NOT NULL CHECK(type IN ('education','technical-projects','work-experience','clubs-and-organization','skills')),
+    type        TEXT NOT NULL CHECK(type IN ('education','technical-projects','work-experience','clubs-and-organization','skills','certifications','awards')),
     order_index INTEGER NOT NULL DEFAULT 0,
     is_visible  INTEGER NOT NULL DEFAULT 1
   );
@@ -57,7 +57,7 @@ if (legacyCount > 0) {
     CREATE TABLE sections_new (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       name        TEXT NOT NULL,
-      type        TEXT NOT NULL CHECK(type IN ('education','technical-projects','work-experience','clubs-and-organization','skills')),
+      type        TEXT NOT NULL CHECK(type IN ('education','technical-projects','work-experience','clubs-and-organization','skills','certifications','awards')),
       order_index INTEGER NOT NULL DEFAULT 0,
       is_visible  INTEGER NOT NULL DEFAULT 1
     );
@@ -73,6 +73,25 @@ if (legacyCount > 0) {
         order_index, is_visible
       FROM sections
       WHERE type IN ('experience','education','skills');
+    DROP TABLE sections;
+    ALTER TABLE sections_new RENAME TO sections;
+  `);
+  db.pragma('foreign_keys = ON');
+}
+
+// Migrate: expand CHECK constraint to include certifications + awards if missing
+const schemaSql = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='sections'").get()?.sql || '';
+if (!schemaSql.includes('certifications')) {
+  db.pragma('foreign_keys = OFF');
+  db.exec(`
+    CREATE TABLE sections_new (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT NOT NULL,
+      type        TEXT NOT NULL CHECK(type IN ('education','technical-projects','work-experience','clubs-and-organization','skills','certifications','awards')),
+      order_index INTEGER NOT NULL DEFAULT 0,
+      is_visible  INTEGER NOT NULL DEFAULT 1
+    );
+    INSERT INTO sections_new SELECT * FROM sections;
     DROP TABLE sections;
     ALTER TABLE sections_new RENAME TO sections;
   `);
