@@ -21,7 +21,8 @@ export function renderCanvas() {
     sectionEl.setAttribute('aria-label', section.name);
 
     const heading = document.createElement('h2');
-    heading.className = 'section-heading text-sm font-bold uppercase tracking-widest border-b border-gray-400 pb-0.5 mb-2 text-gray-900';
+    heading.className = 'section-heading font-bold border-b border-gray-800 pb-0.5 mb-2 text-gray-900';
+    heading.style.fontSize = '13pt';
     heading.setAttribute('role', 'heading');
     heading.setAttribute('aria-level', '2');
     heading.textContent = section.name;
