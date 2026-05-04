@@ -5,13 +5,12 @@ const db = require('../db');
 
 function buildPrompt(type, input) {
   switch (type) {
-    case 'experience':
+    case 'work-experience':
+    case 'technical-projects':
+    case 'clubs-and-organization':
       return `Rewrite as an impact-driven resume bullet point. Start with an action verb. Include a measurable outcome if possible. Return ONLY the rewritten bullet, no explanation, no prefix. Input: ${input}`;
     case 'skills':
       return `Given these skills: ${input}. Suggest 3 missing high-value keywords for a software developer role. Return ONLY a comma-separated list, no explanation.`;
-    case 'awards':
-    case 'certs':
-      return `Rewrite this award or certification description to sound more professional and concise. Return ONLY the rewritten text. Input: ${input}`;
     case 'education':
       return `Write one professional sentence highlighting academic achievement based on: ${input}. Return ONLY the sentence.`;
     default:

@@ -1,5 +1,5 @@
 // AI-generated: application entry point — event delegation, blur-save, toolbar actions
-import { resumeData } from './state.js';
+import { defaultHeader, resumeData } from './state.js';
 import * as api from './api.js';
 import { renderCanvas, swapToEdit, swapToView, injectToolbar, removeToolbar } from './ui.js';
 import { refine } from './ai.js';
@@ -8,8 +8,12 @@ let activeCell = null;
 
 async function init() {
   try {
-    const data = await api.getResume();
+    const [data, header] = await Promise.all([
+      api.getResume(),
+      loadHeader()
+    ]);
     resumeData.sections = data;
+    resumeData.header = header;
     renderCanvas();
   } catch (err) {
     console.error('Failed to load resume data:', err);
@@ -54,7 +58,10 @@ function wireCanvas() {
     // Cell activation
     const cellWrapper = e.target.closest('.cell-wrapper');
     if (cellWrapper && cellWrapper !== activeCell) {
-      if (activeCell) saveCell(activeCell).then(() => swapToView(activeCell));
+      if (activeCell) {
+        const previousCell = activeCell;
+        saveCell(previousCell).then(() => swapToView(previousCell));
+      }
       activeCell = cellWrapper;
       swapToEdit(cellWrapper);
       injectToolbar(cellWrapper);
@@ -83,8 +90,19 @@ async function saveCell(cellWrapper) {
   const editForm = cellWrapper.querySelector('.cell-edit');
   if (!editForm) return;
 
-  const entryId = parseInt(cellWrapper.dataset.entryId);
   const type = cellWrapper.dataset.sectionType;
+
+  if (type === 'header') {
+    const patch = {};
+    for (const field of ['name', 'phone', 'email', 'link', 'address']) {
+      patch[field] = editForm.querySelector(`[name="${field}"]`)?.value ?? '';
+    }
+    await api.setConfig('resume_header', JSON.stringify(patch));
+    Object.assign(resumeData.header, patch);
+    return;
+  }
+
+  const entryId = parseInt(cellWrapper.dataset.entryId);
   const section = resumeData.sections.find(s => s.type === type);
   const entry = section?.entries.find(e => e.id === entryId);
   if (!entry) return;
@@ -110,6 +128,16 @@ async function saveCell(cellWrapper) {
     await api.updateBullet(bulletId, { text, is_selected });
     const bullet = entry.bullets?.find(b => b.id === bulletId);
     if (bullet) { bullet.text = text; bullet.is_selected = is_selected; }
+  }
+}
+
+async function loadHeader() {
+  try {
+    const { value } = await api.getConfig('resume_header');
+    return { ...defaultHeader, ...JSON.parse(value) };
+  } catch (err) {
+    if (String(err.message).includes('404')) return { ...defaultHeader };
+    throw err;
   }
 }
 
@@ -199,7 +227,8 @@ async function handleRefineBullet(bulletRow) {
   textInput.value = 'Refining…';
   textInput.disabled = true;
   try {
-    const { refined } = await refine('experience', original);
+    const sectionType = bulletRow.closest('.cell-wrapper')?.dataset.sectionType || 'work-experience';
+    const { refined } = await refine(sectionType, original);
     textInput.value = refined;
   } catch (err) {
     textInput.value = original;
@@ -269,11 +298,11 @@ function wireAddMenu() {
 
 async function addEntry(type) {
   const typeNames = {
-    experience: 'Work Experience',
-    education:  'Education',
-    skills:     'Skills',
-    awards:     'Awards',
-    certs:      'Certifications'
+    'work-experience':       'Work Experience',
+    'technical-projects':    'Technical Projects',
+    'clubs-and-organization':'Clubs and Organization',
+    'education':             'Education',
+    'skills':                'Skills'
   };
 
   let section = resumeData.sections.find(s => s.type === type);

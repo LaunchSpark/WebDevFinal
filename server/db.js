@@ -12,7 +12,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS sections (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL,
-    type        TEXT NOT NULL CHECK(type IN ('experience','education','skills','awards','certs')),
+    type        TEXT NOT NULL CHECK(type IN ('education','technical-projects','work-experience','clubs-and-organization','skills')),
     order_index INTEGER NOT NULL DEFAULT 0,
     is_visible  INTEGER NOT NULL DEFAULT 1
   );
@@ -41,5 +41,42 @@ db.exec(`
     value TEXT NOT NULL
   );
 `);
+
+// Migrate legacy section types (experience/awards/certs) to resume-matching type set
+const legacyCount = db.prepare(
+  "SELECT COUNT(*) as n FROM sections WHERE type IN ('experience','awards','certs')"
+).get().n;
+
+if (legacyCount > 0) {
+  // Delete awards/certs first — FK ON ensures cascade to entries + bullets
+  db.prepare("DELETE FROM sections WHERE type IN ('awards','certs')").run();
+
+  // Rebuild sections table with new constraint, mapping experience rows by name
+  db.pragma('foreign_keys = OFF');
+  db.exec(`
+    CREATE TABLE sections_new (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT NOT NULL,
+      type        TEXT NOT NULL CHECK(type IN ('education','technical-projects','work-experience','clubs-and-organization','skills')),
+      order_index INTEGER NOT NULL DEFAULT 0,
+      is_visible  INTEGER NOT NULL DEFAULT 1
+    );
+    INSERT INTO sections_new (id, name, type, order_index, is_visible)
+      SELECT id, name,
+        CASE
+          WHEN type = 'education' THEN 'education'
+          WHEN type = 'skills'    THEN 'skills'
+          WHEN type = 'experience' AND (name LIKE '%Technical%' OR name LIKE '%Project%') THEN 'technical-projects'
+          WHEN type = 'experience' AND (name LIKE '%Club%' OR name LIKE '%Organ%') THEN 'clubs-and-organization'
+          ELSE 'work-experience'
+        END,
+        order_index, is_visible
+      FROM sections
+      WHERE type IN ('experience','education','skills');
+    DROP TABLE sections;
+    ALTER TABLE sections_new RENAME TO sections;
+  `);
+  db.pragma('foreign_keys = ON');
+}
 
 module.exports = db;

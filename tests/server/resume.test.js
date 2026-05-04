@@ -24,7 +24,7 @@ describe('GET /api/resume', () => {
 
   test('returns nested sections with entries and bullets', async () => {
     const sec = db.prepare(
-      "INSERT INTO sections (name, type, order_index) VALUES ('Work Experience', 'experience', 0)"
+      "INSERT INTO sections (name, type, order_index) VALUES ('Work Experience', 'work-experience', 0)"
     ).run();
     const ent = db.prepare(
       'INSERT INTO entries (section_id, title, order_index) VALUES (?, ?, 0)'
@@ -37,6 +37,7 @@ describe('GET /api/resume', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(1);
     expect(res.body[0].name).toBe('Work Experience');
+    expect(res.body[0].type).toBe('work-experience');
     expect(res.body[0].entries).toHaveLength(1);
     expect(res.body[0].entries[0].title).toBe('Acme Corp');
     expect(res.body[0].entries[0].bullets).toHaveLength(1);
@@ -45,21 +46,74 @@ describe('GET /api/resume', () => {
 });
 
 describe('POST /api/sections', () => {
-  test('creates a section and returns it with id', async () => {
+  test('creates a section with new type and returns it', async () => {
     const res = await request(app)
       .post('/api/sections')
-      .send({ name: 'Work Experience', type: 'experience', order_index: 0 });
+      .send({ name: 'Work Experience', type: 'work-experience', order_index: 0 });
     expect(res.status).toBe(201);
     expect(res.body.id).toBeDefined();
     expect(res.body.name).toBe('Work Experience');
-    expect(res.body.type).toBe('experience');
+    expect(res.body.type).toBe('work-experience');
+  });
+
+  test('creates technical-projects section', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Technical Projects', type: 'technical-projects', order_index: 0 });
+    expect(res.status).toBe(201);
+    expect(res.body.type).toBe('technical-projects');
+  });
+
+  test('creates clubs-and-organization section', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Clubs and Organization', type: 'clubs-and-organization', order_index: 0 });
+    expect(res.status).toBe(201);
+    expect(res.body.type).toBe('clubs-and-organization');
+  });
+
+  test('creates education section', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Education', type: 'education', order_index: 0 });
+    expect(res.status).toBe(201);
+    expect(res.body.type).toBe('education');
+  });
+
+  test('creates skills section', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Skills', type: 'skills', order_index: 0 });
+    expect(res.status).toBe(201);
+    expect(res.body.type).toBe('skills');
+  });
+
+  test('rejects legacy type experience with 500', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Old Style', type: 'experience', order_index: 0 });
+    expect(res.status).toBe(500);
+  });
+
+  test('rejects legacy type awards with 500', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Awards', type: 'awards', order_index: 0 });
+    expect(res.status).toBe(500);
+  });
+
+  test('rejects legacy type certs with 500', async () => {
+    const res = await request(app)
+      .post('/api/sections')
+      .send({ name: 'Certs', type: 'certs', order_index: 0 });
+    expect(res.status).toBe(500);
   });
 });
 
 describe('DELETE /api/sections/:id cascade', () => {
   test('deletes entries and bullets when section is deleted', async () => {
     const sec = db.prepare(
-      "INSERT INTO sections (name, type, order_index) VALUES ('Test', 'experience', 0)"
+      "INSERT INTO sections (name, type, order_index) VALUES ('Test', 'work-experience', 0)"
     ).run();
     const ent = db.prepare(
       'INSERT INTO entries (section_id, title, order_index) VALUES (?, ?, 0)'
@@ -79,7 +133,7 @@ describe('DELETE /api/sections/:id cascade', () => {
 describe('PATCH /api/entries/:id', () => {
   test('updates entry title', async () => {
     const sec = db.prepare(
-      "INSERT INTO sections (name, type, order_index) VALUES ('Work', 'experience', 0)"
+      "INSERT INTO sections (name, type, order_index) VALUES ('Work', 'work-experience', 0)"
     ).run();
     const ent = db.prepare(
       'INSERT INTO entries (section_id, title, order_index) VALUES (?, ?, 0)'
