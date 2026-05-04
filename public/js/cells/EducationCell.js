@@ -6,11 +6,11 @@ export class EducationCell {
     return `
       <div class="cell-view" role="article" aria-label="Education: ${escHtml(this.data.title || 'untitled')}">
         <div class="flex justify-between items-baseline">
-          <h3 class="entry-title font-bold text-gray-900">${escHtml(this.data.title || '')}</h3>
-          <span class="text-sm text-gray-600">${escHtml(this.data.date || '')}</span>
+          <h3 class="entry-title font-bold text-gray-900" style="font-size:12pt">${escHtml(this.data.title || '')}</h3>
+          <span class="text-gray-900" style="font-size:11pt">${escHtml(this.data.date || '')}</span>
         </div>
-        <p class="text-gray-700 italic text-sm">${escHtml(this.data.subtitle || '')}</p>
-        ${this.data.extra ? `<p class="text-gray-600 text-sm">GPA: ${escHtml(this.data.extra)}</p>` : ''}
+        <p class="text-gray-900" style="font-size:11pt; line-height:1.2">${escHtml(this.data.subtitle || '')}</p>
+        ${this.data.extra ? `<p class="text-gray-900" style="font-size:11pt; line-height:1.2">GPA: ${escHtml(this.data.extra)}</p>` : ''}
       </div>`;
   }
 
