@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlockDraft — Resume Editor</title>
+  <meta name="description" content="Block-based resume editor for tailoring and printing professional resumes">
+  <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="css/tailwind.css">
+  <link rel="stylesheet" href="css/print.css">
+</head>
+<body class="bg-gray-200 min-h-screen">
+
+  <!-- ===== HEADER ===== -->
+  <header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between no-print"
+    role="banner">
+    <div class="flex items-center gap-2">
+      <img src="assets/favicon.ico" alt="" class="w-6 h-6" aria-hidden="true">
+      <span class="font-bold text-gray-900 text-xl tracking-tight">BlockDraft</span>
+    </div>
+    <nav class="flex gap-2" aria-label="Application actions">
+      <button id="settings-btn"
+        class="px-3 py-1.5 text-sm bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        aria-label="Open settings panel" aria-expanded="false" aria-controls="settings-panel">
+        ⚙ Settings
+      </button>
+      <button id="print-btn"
+        class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        aria-label="Print resume or export as PDF">
+        ⎙ Print / PDF
+      </button>
+      <button id="thanks-btn"
+        class="px-3 py-1.5 text-sm bg-gray-100 rounded hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        aria-label="View library attributions">
+        ♥ Credits
+      </button>
+    </nav>
+  </header>
+
+  <!-- ===== SETTINGS PANEL ===== -->
+  <div id="settings-panel"
+    class="hidden fixed top-14 right-4 bg-white border border-gray-200 rounded-lg shadow-xl p-5 w-80 z-50 no-print"
+    role="dialog" aria-modal="true" aria-label="Settings">
+    <h2 class="font-semibold text-gray-900 mb-3">Gemini API Key</h2>
+    <p class="text-xs text-gray-500 mb-2">
+      Get a free key at
+      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener"
+        class="text-blue-600 underline">Google AI Studio</a>.
+      Stored locally — never sent anywhere except Google.
+    </p>
+    <label for="api-key-input" class="text-xs font-medium text-gray-700 block mb-1">
+      API Key
+    </label>
+    <input id="api-key-input" type="password" placeholder="AIza..."
+      class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      aria-label="Gemini API key">
+    <button id="save-key-btn"
+      class="w-full bg-blue-600 text-white text-sm py-1.5 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      aria-label="Save API key">
+      Save Key
+    </button>
+  </div>
+
+  <!-- ===== CREDITS MODAL ===== -->
+  <div id="thanks-modal"
+    class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 no-print"
+    role="dialog" aria-modal="true" aria-label="Library Credits">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+      <h2 class="font-bold text-lg mb-4 text-gray-900">Built With ♥</h2>
+      <ul class="text-sm text-gray-700 space-y-2 list-disc ml-4">
+        <li><strong>Tailwind CSS</strong> — Utility-first CSS (MIT)</li>
+        <li><strong>Express.js</strong> — Node.js web framework (MIT)</li>
+        <li><strong>better-sqlite3</strong> — SQLite for Node.js (MIT)</li>
+        <li><strong>Google Generative AI SDK</strong> — Gemini API client (Apache 2.0)</li>
+        <li><strong>Electron</strong> — Desktop app wrapper (MIT)</li>
+        <li><strong>dotenv</strong> — Environment variable loader (BSD-2)</li>
+        <li><strong>cors</strong> — CORS middleware for Express (MIT)</li>
+      </ul>
+      <button id="close-thanks"
+        class="mt-5 w-full bg-gray-100 rounded py-1.5 text-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        aria-label="Close credits dialog">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== MAIN LAYOUT ===== -->
+  <main class="flex gap-6 p-8 justify-center items-start" role="main" aria-label="Resume editor">
+
+    <!-- Paper Canvas -->
+    <div class="relative">
+      <div id="page-canvas"
+        class="bg-white shadow-2xl p-12 relative"
+        style="width: 8.5in; min-height: 11in;"
+        role="region"
+        aria-label="Resume canvas — click any entry to edit">
+        <!-- Resume sections rendered dynamically by JavaScript -->
+        <p class="text-gray-400 text-sm text-center mt-4" id="empty-hint">
+          Click "Add Section" to get started.
+        </p>
+      </div>
+    </div>
+
+    <!-- Sidebar Controls -->
+    <aside class="no-print pt-2 flex flex-col gap-3" aria-label="Editor controls">
+
+      <!-- Add Section dropdown -->
+      <div class="relative">
+        <button id="add-btn"
+          class="w-full px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-400"
+          aria-label="Add a resume section" aria-haspopup="true" aria-expanded="false"
+          aria-controls="add-menu">
+          + Add Section
+        </button>
+        <ul id="add-menu"
+          class="hidden absolute top-10 left-0 bg-white border border-gray-200 rounded-lg shadow-lg w-48 text-sm z-10"
+          role="menu" aria-label="Choose section type">
+          <li role="presentation">
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+              data-type="experience" role="menuitem">
+              💼 Work Experience
+            </button>
+          </li>
+          <li role="presentation">
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+              data-type="education" role="menuitem">
+              🎓 Education
+            </button>
+          </li>
+          <li role="presentation">
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+              data-type="skills" role="menuitem">
+              💡 Skills Category
+            </button>
+          </li>
+          <li role="presentation">
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+              data-type="awards" role="menuitem">
+              🏆 Award
+            </button>
+          </li>
+          <li role="presentation">
+            <button class="w-full text-left px-4 py-2 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none"
+              data-type="certs" role="menuitem">
+              📜 Certification
+            </button>
+          </li>
+        </ul>
+      </div>
+
+    </aside>
+
+  </main>
+
+  <script type="module" src="js/core.js"></script>
+</body>
+</html>
