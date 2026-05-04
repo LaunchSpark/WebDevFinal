@@ -1,5 +1,5 @@
 // AI-generated: fetch wrappers for all Express REST routes
-const BASE = 'http://localhost:3001/api';
+const BASE = new URL('/api', window.location.origin).toString().replace(/\/$/, '');
 
 async function request(method, path, body) {
   const opts = { method, headers: { 'Content-Type': 'application/json' } };
