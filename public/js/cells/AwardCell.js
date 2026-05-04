@@ -6,10 +6,10 @@ export class AwardCell {
     return `
       <div class="cell-view" role="article" aria-label="${escHtml(this.data.title || 'Award/Certification')}">
         <div class="flex justify-between items-baseline">
-          <h3 class="entry-title font-semibold text-gray-900">${escHtml(this.data.title || '')}</h3>
-          <span class="text-sm text-gray-600">${escHtml(this.data.date || '')}</span>
+          <h3 class="entry-title font-bold text-gray-900" style="font-size:12pt">${escHtml(this.data.title || '')}</h3>
+          <span class="text-gray-900" style="font-size:11pt">${escHtml(this.data.date || '')}</span>
         </div>
-        ${this.data.extra ? `<p class="text-gray-600 text-sm italic">${escHtml(this.data.extra)}</p>` : ''}
+        ${this.data.extra ? `<p class="italic text-gray-900" style="font-size:11pt; line-height:1.2">${escHtml(this.data.extra)}</p>` : ''}
       </div>`;
   }
 
