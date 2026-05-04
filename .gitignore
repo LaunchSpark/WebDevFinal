@@ -72,6 +72,8 @@ web_modules/
 
 # SQLite database files
 *.db
+*.db-shm
+*.db-wal
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
