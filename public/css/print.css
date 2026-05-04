@@ -1,1 +1,85 @@
-/* Print rules added in Task 8 */
+@media print {
+  /* Hide all UI chrome */
+  .no-print,
+  header,
+  aside,
+  #settings-panel,
+  #thanks-modal,
+  #cell-toolbar,
+  .bullet-add,
+  .bullet-delete,
+  .bullet-refine,
+  .skill-refine,
+  .award-refine,
+  .ring-2 {
+    display: none !important;
+  }
+
+  /* Reset page layout */
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  main {
+    padding: 0 !important;
+    display: block !important;
+  }
+
+  /* Canvas becomes the full page */
+  #page-canvas {
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    font-family: Georgia, 'Times New Roman', serif !important;
+  }
+
+  /* Hide deselected entries */
+  .entry-deselected {
+    display: none !important;
+  }
+
+  /* Typography */
+  h2.section-heading {
+    font-size: 11pt;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid #555;
+    padding-bottom: 2pt;
+    margin-bottom: 5pt;
+    color: black;
+  }
+
+  h3.entry-title {
+    font-size: 11pt;
+    font-weight: bold;
+    color: black;
+  }
+
+  p, li, span {
+    font-size: 10pt;
+    line-height: 1.35;
+    color: black;
+  }
+
+  ul {
+    margin-left: 14pt;
+    padding-left: 0;
+    list-style-type: disc;
+  }
+
+  .cell-wrapper {
+    cursor: default !important;
+    margin-bottom: 5pt !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  @page {
+    margin: 0.75in;
+    size: letter portrait;
+  }
+}
