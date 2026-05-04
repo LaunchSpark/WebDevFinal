@@ -5,16 +5,16 @@ export class ExperienceCell {
   renderView() {
     const bullets = (this.data.bullets || [])
       .filter(b => b.is_selected)
-      .map(b => `<li class="ml-4">${escHtml(b.text)}</li>`)
+      .map(b => `<li style="font-size:11pt; line-height:1.2; margin-left:1.2em">${escHtml(b.text)}</li>`)
       .join('');
     return `
       <div class="cell-view" role="article" aria-label="Work experience: ${escHtml(this.data.title || 'untitled')}">
         <div class="flex justify-between items-baseline">
-          <h3 class="entry-title font-bold text-gray-900">${escHtml(this.data.title || '')}</h3>
-          <span class="text-sm text-gray-600">${escHtml(this.data.date || '')}</span>
+          <span class="text-gray-900" style="font-size:11pt">${escHtml(this.data.date || '')}</span>
+          <h3 class="entry-title font-bold text-gray-900" style="font-size:12pt">${escHtml(this.data.title || '')}</h3>
         </div>
-        <p class="text-gray-700 italic text-sm">${escHtml(this.data.subtitle || '')}</p>
-        ${bullets ? `<ul class="list-disc text-gray-800 text-sm mt-1">${bullets}</ul>` : ''}
+        <p class="font-bold text-gray-900" style="font-size:11pt; line-height:1.2">${escHtml(this.data.subtitle || '')}</p>
+        ${bullets ? `<ul class="list-none text-gray-900" style="margin-top:2pt">${bullets}</ul>` : ''}
       </div>`;
   }
 
